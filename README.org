@@ -1,0 +1,24 @@
+* json-search
+
+Welcome to this project!
+
+This is a tool that takes a JSON strucure and searches through it and gives back the matching object.
+
+If I do this with ouptut from pactl -f json list sinks, you can see the output below.
+
+#+begin_src bash
+  pactl -f json list sinks | json-search-exe 'hdmi-output' | jq
+#+end_src
+
+#+begin_src js
+  [
+    {
+      "active_port": "hdmi-output-0",
+      "ports": [
+        {
+          "name": "hdmi-output-0"
+        }
+      ]
+    }
+  ]
+#+end_src

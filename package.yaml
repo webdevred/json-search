@@ -1,14 +1,13 @@
 name:                json-search
 version:             0.1.0.0
-github:              "githubuser/json-search"
+github:              "webdevred/json-search"
 license:             BSD-3-Clause
-author:              "Author name here"
+author:              "webdevred"
 maintainer:          "example@example.com"
-copyright:           "2024 Author name here"
+copyright:           "2024 August Johansson"
 
 extra-source-files:
-- README.md
-- CHANGELOG.md
+- README.org
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -25,7 +24,6 @@ dependencies:
 - utf8-string
 - aeson
 - vector
-- scientific
 - text
 - containers
 
