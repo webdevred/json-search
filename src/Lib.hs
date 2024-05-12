@@ -53,9 +53,7 @@ parseValue "true" = Just (Aeson.Bool True)
 parseValue "false" = Just (Aeson.Bool False)
 parseValue str =
   if all (`elem` ['0' .. '9']) str
-    then case readMaybe str of
-           Just sci -> Just (Aeson.Number sci)
-           Nothing -> Nothing
+    then fmap Aeson.Number $ readMaybe str 
     else let stripped = T.tail . T.init . T.pack $ str
           in Just (Aeson.String stripped)
 
