@@ -24,7 +24,7 @@ import Data.ByteString.Lazy.UTF8 (ByteString)
 
 data MapForest
   = Tree (Map String MapForest)
-  | Branch [MapForest]
+  | Branch (V.Vector MapForest)
   | Leaf String
   deriving (Show, Eq)
 
@@ -39,13 +39,13 @@ instance Aeson.FromJSON MapForest where
   parseJSON (Aeson.String s) = pure . Leaf . show . T.unpack $ s
   parseJSON (Aeson.Number n) = pure . Leaf . show $ n
   parseJSON (Aeson.Bool b) = pure . Leaf . show $ b
-  parseJSON (Aeson.Array a) = Branch <$> traverse Aeson.parseJSON (V.toList a)
+  parseJSON (Aeson.Array a) = Branch <$> traverse Aeson.parseJSON a
 
 instance Aeson.ToJSON MapForest where
   toJSON (Tree m) =
     Aeson.object
       [(K.fromText . T.pack $ k) .= Aeson.toJSON v | (k, v) <- Map.toList m]
-  toJSON (Branch forests) = Aeson.Array . V.fromList . fmap Aeson.toJSON $ forests
+  toJSON (Branch forests) = Aeson.Array . V.map Aeson.toJSON $ forests
   toJSON (Leaf s) = Aeson.toJSON . parseValue $ s
 
 parseValue :: String -> Maybe Aeson.Value
@@ -59,12 +59,12 @@ parseValue str =
 
 notEmptyForest :: MapForest -> Bool
 notEmptyForest (Tree m) = not $ Map.null m
-notEmptyForest (Branch []) = False
+notEmptyForest (Branch vec) = not $ V.null vec
 notEmptyForest _ = True
 
 hasFilteredChild :: (MapForest -> Bool) -> MapForest -> Bool
 hasFilteredChild p (Tree m) = any p (Map.elems m)
-hasFilteredChild p (Branch l) = any (\v -> p v || hasFilteredChild p v) l
+hasFilteredChild p (Branch vec) = any (\v -> p v || hasFilteredChild p v) vec
 hasFilteredChild _ _ = False
 
 isLeaf :: MapForest -> Bool
@@ -86,10 +86,10 @@ filterMapForest p False (Tree m) =
       Map.mapWithKey (\k v -> filterMapForest p (p (Leaf k)) v) $
       filteredMap
 filterMapForest p True (Branch forests) =
-  Branch . map (filterMapForest p True) $ forests
+  Branch . V.map (filterMapForest p True) $ forests
 filterMapForest p False (Branch forests) =
-  let filteredList = filter (\v -> p v || hasFilteredChild p v) forests
-   in Branch . filter notEmptyForest . map (filterMapForest p False) $
+  let filteredList = V.filter (\v -> p v || hasFilteredChild p v) forests
+   in Branch . V.filter notEmptyForest . V.map (filterMapForest p False) $
       filteredList
 filterMapForest _ _ leaf@(Leaf _) = leaf
 
@@ -102,7 +102,7 @@ containsSubstring :: String -> MapForest -> Bool
 containsSubstring a (Tree m) =
   any (isInfixOf (map toLower a)) (Map.keys m) ||
   any (containsSubstring a) (Map.elems m)
-containsSubstring a (Branch l) = any (containsSubstring a) l
+containsSubstring a (Branch vec) = any (containsSubstring a) vec
 containsSubstring a (Leaf s) = isInfixOf a (map toLower s)
 
 predicate :: String -> MapForest -> Bool
