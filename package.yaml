@@ -20,6 +20,7 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- relude
 - bytestring
 - utf8-string
 - aeson
@@ -37,6 +38,12 @@ ghc-options:
 - -Wmissing-home-modules
 - -Wpartial-fields
 - -Wredundant-constraints
+- -Wno-unused-imports
+- -XNoImplicitPrelude
+
+default-extensions:
+  - NoImplicitPrelude
+  - OverloadedStrings
 
 library:
   source-dirs: src
