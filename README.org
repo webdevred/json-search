@@ -4,21 +4,22 @@ Welcome to this project!
 
 This is a tool that takes a JSON strucure and searches through it and gives back the matching object.
 
-If I do this with ouptut from pactl -f json list sinks, you can see the output below.
+Here is the output when using the -a flag:
 
 #+begin_src bash
-  pactl -f json list sinks | json-search-exe 'hdmi-output' | jq
+  cat example.json | json-search-exe -a '[2].preferences.likes'
 #+end_src
 
 #+begin_src js
-  [
-    {
-      "active_port": "hdmi-output-0",
-      "ports": [
-        {
-          "name": "hdmi-output-0"
-        }
-      ]
-    }
-  ]
+  ["sleeping", "eating"]
+#+end_src
+
+Here is the output when using the -s flag:
+
+#+begin_src bash
+  cat example.json | json-search-exe -s 'name'
+#+end_src
+
+#+begin_src js
+  [{"name":"Whiskers"},{"name":"Mittens"},{"name":"Felix"}]
 #+end_src

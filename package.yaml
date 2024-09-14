@@ -27,6 +27,7 @@ dependencies:
 - vector
 - text
 - containers
+- attoparsec
 
 ghc-options:
 - -Wall
@@ -39,7 +40,7 @@ ghc-options:
 - -Wpartial-fields
 - -Wredundant-constraints
 - -Wno-unused-imports
-- -XNoImplicitPrelude
+
 
 default-extensions:
   - NoImplicitPrelude

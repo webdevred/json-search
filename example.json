@@ -1,0 +1,41 @@
+[
+  {
+    "name": "Whiskers",
+    "age": 5,
+    "details": {
+      "breed": "Siamese",
+      "color": "Seal point",
+      "weight_kg": 4.2
+    },
+    "preferences": {
+      "likes": ["playing with toys", "sunbathing"],
+      "dislikes": ["loud noises", "getting wet"]
+    }
+  },
+  {
+    "name": "Mittens",
+    "age": 3,
+    "details": {
+      "breed": "Maine Coon",
+      "color": "Tabby",
+      "weight_kg": 6.8
+    },
+    "preferences": {
+      "likes": ["cuddling", "chasing butterflies"],
+      "dislikes": ["being alone"]
+    }
+  },
+  {
+    "name": "Felix",
+    "age": 2,
+    "details": {
+      "breed": "British Shorthair",
+      "color": "Blue",
+      "weight_kg": 5.5
+    },
+    "preferences": {
+      "likes": ["sleeping", "eating"],
+      "dislikes": ["loud music"]
+    }
+  }
+]
