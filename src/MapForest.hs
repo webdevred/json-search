@@ -1,13 +1,15 @@
-module MapForest (MapForest(..)) where
+module MapForest
+  ( MapForest(..)
+  ) where
 
 import Relude hiding (ByteString)
 import Relude.Bool (Bool(..))
 
-import qualified Data.Vector as V
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Text (Text)
 import qualified Data.Text as T
+import qualified Data.Vector as V
 
 import Data.Aeson ((.=))
 import qualified Data.Aeson as Aeson

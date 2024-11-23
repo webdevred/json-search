@@ -7,16 +7,15 @@ import Relude.Bool (Bool(..))
 
 import qualified Data.Aeson as Aeson (encode)
 
-import qualified Data.Vector as V
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.Text (Text)
 import qualified Data.Text as T
+import qualified Data.Vector as V
 
 import Data.ByteString.Lazy.UTF8 (ByteString)
-import Query
 import MapForest
-
+import Query
 
 notEmptyForest :: MapForest -> Bool
 notEmptyForest (Tree m) = not $ Map.null m
@@ -57,7 +56,6 @@ filterMapForest _ _ leaf@(Leaf _) = leaf
 manipulateContents :: Query -> MapForest -> ByteString
 manipulateContents (SimpleQuery searchFor) mapForest =
   Aeson.encode (filterMapForest (predicate searchFor) False mapForest)
-
 manipulateContents (AdvancedQuery searchFor) mapForest =
   Aeson.encode (advancedQuery (encodeUtf8 searchFor) mapForest)
 
