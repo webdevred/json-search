@@ -33,15 +33,15 @@ main = do
      Nothing -> putStrLn "fatal error occurred =( please consider reading the source code =) "
 
 getQuery :: Maybe Query -> Query
-getQuery maybeQry = fromMaybe (SimpleQuery "") maybeQry
+getQuery = fromMaybe (SimpleQuery "")
 
 parseArgs :: [String] -> IO Options
 parseArgs argv =
   case getOpt Permute options argv of
     (opts, _, []) -> foldl' (>>=) (return startOptions) opts
-    (_, _, errors) -> withFrozenCallStack $ error $ T.pack (intercalate ", " errors)
+    (_, _, errors) -> withFrozenCallStack . error $ T.pack (intercalate ", " errors)
 
-data Options = Options
+newtype Options = Options
   { optQuery :: Maybe Query }
 
 startOptions :: Options

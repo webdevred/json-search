@@ -1,6 +1,8 @@
+
 {-# LANGUAGE ImportQualifiedPost #-}
 module Query (Query(..),advancedQuery) where
 
+import Relude.Unsafe (fromJust)
 import Relude hiding (ByteString)
 import qualified Data.Attoparsec.ByteString as A
 import qualified Data.Attoparsec.ByteString.Char8 as C
@@ -13,10 +15,6 @@ import Control.Applicative ((<|>))
 import Data.ByteString.Internal (c2w)
 import qualified Data.ByteString.Lazy as BL
 
-
--- import Data.Text (Text)
--- import Control.Applicative ((<|>))
-
 import Control.Monad
 import qualified Data.Map as Map
 
@@ -25,8 +23,6 @@ import Data.Vector ((!?))
 import MapForest
 
 import Data.Text qualified as T
--- import Text.Read (readMaybe)
--- import Data.Word
 
 data Query
   = AdvancedQuery Text
@@ -36,7 +32,7 @@ data Query
 keySelector :: Parser ByteString Selector
 keySelector = do
   _ <- C.char '.'
-  treeKey <- (A.takeWhile (\e -> not $ elem e [c2w a | a <- ['[', '.', ' ']]))
+  treeKey <- A.takeWhile (\e -> e `notElem` [c2w a | a <- ['[', '.', ' ']])
   return . TreeKey $ decodeUtf8 treeKey
 
 indexSelector :: Parser ByteString Selector
@@ -62,58 +58,55 @@ advancedQuery predicateStr mapForest =
 andEither ::
      Either Selector MapForest
   -> Either Selector MapForest
-  -> Either Selector MapForest
-andEither (Right _) (Right expr) = Right expr
-andEither (Left expr) _ = Left expr
-andEither _ (Left expr) = Left expr
+  -> Maybe MapForest
+andEither (Right _) (Right expr) = Just expr
+andEither (Left _) _             = Nothing
+andEither _ (Left _)             = Nothing
 
 orEither ::
      Either Selector MapForest
   -> Either Selector MapForest
-  -> Either Selector MapForest
-orEither (Right expr) _ = Right expr
-orEither _ (Right expr) = Right expr
-orEither _ (Left expr) = Left expr
+  -> Maybe MapForest
+orEither _ (Right expr)          = Just expr
+orEither _ (Left _)              = Nothing
+
+justToRight :: Maybe MapForest -> Either Selector MapForest 
+justToRight = Right . fromJust
 
 runExpr :: Expr -> MapForest -> Either Selector MapForest
-runExpr (And expr1 expr2) mf = andEither (runExpr expr1 mf) (runExpr expr2 mf)
-runExpr (Or expr1 expr2) mf = orEither (runExpr expr1 mf) (runExpr expr2 mf)
+runExpr (And expr1 expr2) mf = justToRight $ andEither (runExpr expr1 mf) (runExpr expr2 mf)
+runExpr (Or expr1 expr2) mf = justToRight $ orEither (runExpr expr1 mf) (runExpr expr2 mf)
 runExpr (Getter expr) mf = runGetter expr mf
 
 getterParser :: Parser ByteString Getter
-getterParser = do
-  selectors <- C.many' (keySelector <|> indexSelector)
-  return selectors
+getterParser = C.many' (keySelector <|> indexSelector)
 
 data Expr
   = And Expr Expr
   | Or Expr Expr
   | Getter Getter deriving Show
 
+orExprParser :: Parser ByteString Expr
 orExprParser = do
   _ <- A.string "or"
   _ <- C.char ' '
   expr1 <- exprParser
   _ <- C.char ' '
-  expr2 <- exprParser
-  return (Or expr1 expr2)
+  Or expr1 <$> exprParser
 
+andExprParser :: Parser ByteString Expr
 andExprParser = do
   _ <- A.string "and"
   _ <- C.char ' '
   expr1 <- exprParser
   _ <- C.char ' '
-  expr2 <- exprParser
-  return (And expr1 expr2)
+  And expr1 <$> exprParser
 
-getterExprParser = do
-  expr <- getterParser
-  return (Getter expr)
+getterExprParser :: Parser ByteString Expr
+getterExprParser = Getter <$> getterParser
 
 exprParser :: Parser ByteString Expr
-exprParser = do
-  expr <- orExprParser <|> andExprParser <|> getterExprParser
-  return expr
+exprParser = orExprParser <|> andExprParser <|> getterExprParser
 
 data Selector
   = BranchIndex Int
@@ -137,4 +130,4 @@ runGetter ::
   Getter
   -> MapForest
   -> Either Selector MapForest
-runGetter funs = foldl' (>=>) (id) (map select funs) . Right
+runGetter funs = foldl' (>=>) id (map select funs) . Right

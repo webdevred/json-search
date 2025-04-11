@@ -33,7 +33,7 @@ isLeaf _ = False
 
 filterMapForest :: (MapForest -> Bool) -> Bool -> MapForest -> MapForest
 filterMapForest p True tree@(Tree m) =
-  Tree $ Map.union (Map.filter isLeaf m) $ fromMaybe m filteredForest
+  Tree . Map.union (Map.filter isLeaf m) $ fromMaybe m filteredForest
   where
     getMap (Tree m') = Just m'
     getMap _ = Nothing
@@ -43,7 +43,7 @@ filterMapForest p False (Tree m) =
         Map.filterWithKey (\k v -> p v || p (Leaf k) || hasFilteredChild p v) m
    in Tree .
       Map.filter notEmptyForest .
-      Map.mapWithKey (\k v -> filterMapForest p (p (Leaf k)) v) $
+      Map.mapWithKey (filterMapForest p . p . Leaf) $
       filteredMap
 filterMapForest p True (Branch forests) =
   Branch . V.map (filterMapForest p True) $ forests
