@@ -45,6 +45,7 @@ ghc-options:
 default-extensions:
   - NoImplicitPrelude
   - OverloadedStrings
+  - ImportQualifiedPost
 
 library:
   source-dirs: src

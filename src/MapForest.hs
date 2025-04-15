@@ -6,15 +6,15 @@ import Relude hiding (ByteString)
 import Relude.Bool (Bool(..))
 
 import Data.Map (Map)
-import qualified Data.Map as Map
+import Data.Map qualified as Map
 import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Vector as V
+import Data.Text qualified as T
+import Data.Vector qualified as V
 
 import Data.Aeson ((.=))
-import qualified Data.Aeson as Aeson
-import qualified Data.Aeson.Key as K
-import qualified Data.Aeson.KeyMap as KM
+import Data.Aeson qualified as Aeson
+import Data.Aeson.Key qualified as K
+import Data.Aeson.KeyMap qualified as KM
 import Data.Aeson.Types ()
 
 unwrap :: Text -> Maybe Text
@@ -24,8 +24,8 @@ parseValue :: Text -> Maybe Aeson.Value
 parseValue "true" = Just (Aeson.Bool True)
 parseValue "false" = Just (Aeson.Bool False)
 parseValue str =
-  fmap Aeson.String (unwrap str) <|>
-  fmap Aeson.Number (readMaybe . toString $ str)
+  fmap Aeson.String (unwrap str)
+    <|> fmap Aeson.Number (readMaybe . toString $ str)
 
 data MapForest
   = Tree (Map Text MapForest)

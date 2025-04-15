@@ -5,13 +5,13 @@ module Lib
 import Relude hiding (ByteString)
 import Relude.Bool (Bool(..))
 
-import qualified Data.Aeson as Aeson (encode)
+import Data.Aeson qualified as Aeson (encode)
 
 import Data.Map (Map)
-import qualified Data.Map as Map
+import Data.Map qualified as Map
 import Data.Text (Text)
-import qualified Data.Text as T
-import qualified Data.Vector as V
+import Data.Text qualified as T
+import Data.Vector qualified as V
 
 import Data.ByteString.Lazy.UTF8 (ByteString)
 import MapForest
@@ -41,16 +41,16 @@ filterMapForest p True tree@(Tree m) =
 filterMapForest p False (Tree m) =
   let filteredMap =
         Map.filterWithKey (\k v -> p v || p (Leaf k) || hasFilteredChild p v) m
-   in Tree .
-      Map.filter notEmptyForest .
-      Map.mapWithKey (filterMapForest p . p . Leaf) $
-      filteredMap
+   in Tree
+        . Map.filter notEmptyForest
+        . Map.mapWithKey (filterMapForest p . p . Leaf)
+        $ filteredMap
 filterMapForest p True (Branch forests) =
   Branch . V.map (filterMapForest p True) $ forests
 filterMapForest p False (Branch forests) =
   let filteredList = V.filter (\v -> p v || hasFilteredChild p v) forests
-   in Branch . V.filter notEmptyForest . V.map (filterMapForest p False) $
-      filteredList
+   in Branch . V.filter notEmptyForest . V.map (filterMapForest p False)
+        $ filteredList
 filterMapForest _ _ leaf@(Leaf _) = leaf
 
 manipulateContents :: Query -> MapForest -> ByteString
@@ -61,8 +61,8 @@ manipulateContents (AdvancedQuery searchFor) mapForest =
 
 containsSubstring :: Text -> MapForest -> Bool
 containsSubstring a (Tree m) =
-  any (T.isInfixOf (T.toLower a)) (Map.keys m) ||
-  any (containsSubstring a) (Map.elems m)
+  any (T.isInfixOf (T.toLower a)) (Map.keys m)
+    || any (containsSubstring a) (Map.elems m)
 containsSubstring a (Branch vec) = any (containsSubstring a) vec
 containsSubstring a (Leaf s) = T.isInfixOf a (T.toLower s)
 
