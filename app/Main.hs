@@ -39,7 +39,7 @@ getQuery = fromMaybe (SimpleQuery "")
 parseArgs :: [String] -> IO Options
 parseArgs argv =
   case getOpt Permute options argv of
-    (opts, _, []) -> foldl' (>>=) (return startOptions) opts
+    (opts, _, []) -> foldl' (>>=) (pure startOptions) opts
     (_, _, errors) ->
       withFrozenCallStack . error $ T.pack (intercalate ", " errors)
 
@@ -57,15 +57,14 @@ options =
       "s"
       ["simple-getter"]
       (ReqArg
-         (\arg opt -> return opt {optQuery = return (SimpleQuery $ T.pack arg)})
+         (\arg opt -> pure opt {optQuery = pure (SimpleQuery $ T.pack arg)})
          "SIMPLE GETTER QUERY")
       "Simple Getter"
   , Option
       "a"
       ["advanced-getter"]
       (ReqArg
-         (\arg opt ->
-            return opt {optQuery = return (AdvancedQuery $ T.pack arg)})
+         (\arg opt -> pure opt {optQuery = pure (AdvancedQuery $ T.pack arg)})
          "ADVANCED GETTER")
       "Advanced Getter"
   ]

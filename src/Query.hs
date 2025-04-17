@@ -33,15 +33,15 @@ data Query
 keySelector :: Parser ByteString Selector
 keySelector = do
   _ <- C.char '.'
-  treeKey <- A.takeWhile (\e -> e `notElem` [c2w a | a <- ['[', '.', ' ']])
-  return . TreeKey $ decodeUtf8 treeKey
+  treeKey <- A.takeWhile (\e -> e `notElem` map c2w ['[', '.', ' '])
+  pure . TreeKey $ decodeUtf8 treeKey
 
 indexSelector :: Parser ByteString Selector
 indexSelector = do
   _ <- C.char '['
   branchIndex <- C.decimal
   _ <- C.char ']'
-  return . BranchIndex $ branchIndex
+  pure . BranchIndex $ branchIndex
 
 queryError :: Selector -> Text
 queryError (BranchIndex i) = T.append "can not find BranchIndex " $ show i
