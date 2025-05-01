@@ -3,11 +3,17 @@ module Query
   , advancedQuery
   ) where
 
-import Data.Attoparsec.ByteString qualified as A
-import Data.Attoparsec.ByteString.Char8 qualified as C
-import Data.Attoparsec.Internal.Types (Parser)
+import Data.Void (Void)
+import Text.Megaparsec qualified as MP
+import Text.Megaparsec.Byte qualified as B
+import Text.Megaparsec.Byte.Lexer qualified as L (decimal)
+import Text.Megaparsec.Char qualified as C
+
+import Data.Word (Word8)
+
 import Data.ByteString (ByteString)
-import Data.ByteString qualified as BS (null)
+import Data.ByteString qualified as BS (null, pack)
+import Data.Functor (($>), (<&>))
 import Relude hiding (ByteString)
 import Relude.Unsafe (fromJust)
 
@@ -25,23 +31,31 @@ import MapForest
 
 import Data.Text qualified as T
 
+type Parser = MP.Parsec Void ByteString
+
 data Query
   = AdvancedQuery Text
   | SimpleQuery Text
   deriving (Show)
 
-keySelector :: Parser ByteString Selector
-keySelector = do
-  _ <- C.char '.'
-  treeKey <- A.takeWhile (\e -> e `notElem` map c2w ['[', '.', ' '])
-  pure . TreeKey $ decodeUtf8 treeKey
+tryParsers :: [Parser a] -> Parser a
+tryParsers = asum . map MP.try
 
-indexSelector :: Parser ByteString Selector
-indexSelector = do
-  _ <- C.char '['
-  branchIndex <- C.decimal
-  _ <- C.char ']'
-  pure . BranchIndex $ branchIndex
+toChar :: Word8 -> Char
+toChar = chr . fromIntegral
+
+byteChar :: Char -> Parser Word8
+byteChar = B.char . fromIntegral . ord
+
+keySelector :: Parser Selector
+keySelector = byteChar '.' >> packKey
+  where
+    validKeyChar c = toChar c `notElem` ['.', '[', ' ']
+    parseKey = MP.some (MP.satisfy validKeyChar)
+    packKey = parseKey <&> TreeKey . decodeUtf8 . BS.pack
+
+indexSelector :: Parser Selector
+indexSelector = BranchIndex <$> (byteChar '[' *> L.decimal <* byteChar ']')
 
 queryError :: Selector -> Text
 queryError (BranchIndex i) = T.append "can not find BranchIndex " $ show i
@@ -50,9 +64,7 @@ queryError (TreeKey k) = T.append "can not find Treekey " k
 advancedQuery :: ByteString -> MapForest -> MapForest
 advancedQuery predicateStr mapForest =
   withFrozenCallStack
-    $ case (C.parseOnly (exprParser <* A.endOfInput) predicateStr :: Either
-              String
-              Expr) of
+    $ case MP.parse (exprParser <* MP.eof) "<input>" predicateStr of
         Right expr ->
           case runExpr expr mapForest of
             Right mf -> mf
@@ -80,8 +92,8 @@ runExpr (Or expr1 expr2) mf =
   justToRight $ orEither (runExpr expr1 mf) (runExpr expr2 mf)
 runExpr (Getter expr) mf = runGetter expr mf
 
-getterParser :: Parser ByteString Getter
-getterParser = C.many' (keySelector <|> indexSelector)
+getterParser :: Parser Getter
+getterParser = MP.some (tryParsers [keySelector, indexSelector])
 
 data Expr
   = And Expr Expr
@@ -89,27 +101,27 @@ data Expr
   | Getter Getter
   deriving (Show)
 
-orExprParser :: Parser ByteString Expr
+orExprParser :: Parser Expr
 orExprParser = do
-  _ <- A.string "or"
-  _ <- C.char ' '
+  _ <- B.string "or"
+  _ <- byteChar ' '
   expr1 <- exprParser
-  _ <- C.char ' '
+  _ <- byteChar ' '
   Or expr1 <$> exprParser
 
-andExprParser :: Parser ByteString Expr
+andExprParser :: Parser Expr
 andExprParser = do
-  _ <- A.string "and"
-  _ <- C.char ' '
+  _ <- B.string "and"
+  _ <- byteChar ' '
   expr1 <- exprParser
-  _ <- C.char ' '
+  _ <- byteChar ' '
   And expr1 <$> exprParser
 
-getterExprParser :: Parser ByteString Expr
+getterExprParser :: Parser Expr
 getterExprParser = Getter <$> getterParser
 
-exprParser :: Parser ByteString Expr
-exprParser = orExprParser <|> andExprParser <|> getterExprParser
+exprParser :: Parser Expr
+exprParser = tryParsers [orExprParser, andExprParser, getterExprParser]
 
 data Selector
   = BranchIndex Int
