@@ -1,35 +1,28 @@
-module Query
-  ( Query(..)
-  , advancedQuery
-  ) where
+module Query (
+  Query (..),
+  advancedQuery,
+) where
 
+import Control.Applicative ((<|>))
+import Control.Monad
+import Data.ByteString (ByteString)
+import Data.ByteString.Internal (c2w)
+import Data.Functor (($>), (<&>))
+import Data.Vector ((!?))
 import Data.Void (Void)
+import Data.Word (Word8)
+import MapForest
+import Relude hiding (ByteString)
+import Relude.Unsafe (fromJust)
+
+import Data.ByteString qualified as BS (null, pack)
+import Data.ByteString.Lazy qualified as BL
+import Data.Map qualified as Map
+import Data.Text qualified as T
 import Text.Megaparsec qualified as MP
 import Text.Megaparsec.Byte qualified as B
 import Text.Megaparsec.Byte.Lexer qualified as L (decimal)
 import Text.Megaparsec.Char qualified as C
-
-import Data.Word (Word8)
-
-import Data.ByteString (ByteString)
-import Data.ByteString qualified as BS (null, pack)
-import Data.Functor (($>), (<&>))
-import Relude hiding (ByteString)
-import Relude.Unsafe (fromJust)
-
-import Control.Applicative ((<|>))
-
-import Data.ByteString.Internal (c2w)
-import Data.ByteString.Lazy qualified as BL
-
-import Control.Monad
-import Data.Map qualified as Map
-
-import Data.Vector ((!?))
-
-import MapForest
-
-import Data.Text qualified as T
 
 type Parser = MP.Parsec Void ByteString
 
@@ -65,20 +58,21 @@ advancedQuery :: ByteString -> MapForest -> MapForest
 advancedQuery predicateStr mapForest =
   withFrozenCallStack
     $ case MP.parse (exprParser <* MP.eof) "<input>" predicateStr of
-        Right expr ->
-          case runExpr expr mapForest of
-            Right mf -> mf
-            Left s -> error $ queryError s
-        Left _ -> error "invalid selector"
+      Right expr ->
+        case runExpr expr mapForest of
+          Right mf -> mf
+          Left s -> error $ queryError s
+      Left _ -> error "invalid selector"
 
-andEither ::
-     Either Selector MapForest -> Either Selector MapForest -> Maybe MapForest
+andEither
+  :: Either Selector MapForest -> Either Selector MapForest -> Maybe MapForest
 andEither (Right _) (Right expr) = Just expr
 andEither (Left _) _ = Nothing
 andEither _ (Left _) = Nothing
 
-orEither ::
-     Either Selector MapForest -> Either Selector MapForest -> Maybe MapForest
+orEither
+  :: Either Selector MapForest -> Either Selector MapForest -> Maybe MapForest
+orEither (Right expr) _ = Just expr
 orEither _ (Right expr) = Just expr
 orEither _ (Left _) = Nothing
 

@@ -1,21 +1,19 @@
-module Lib
-  ( manipulateContents
-  ) where
-
-import Relude hiding (ByteString)
-import Relude.Bool (Bool(..))
-
-import Data.Aeson qualified as Aeson (encode)
-
-import Data.Map (Map)
-import Data.Map qualified as Map
-import Data.Text (Text)
-import Data.Text qualified as T
-import Data.Vector qualified as V
+module Lib (
+  manipulateContents,
+) where
 
 import Data.ByteString.Lazy.UTF8 (ByteString)
+import Data.Map (Map)
+import Data.Text (Text)
 import MapForest
 import Query
+import Relude hiding (ByteString)
+import Relude.Bool (Bool (..))
+
+import Data.Aeson qualified as Aeson (encode)
+import Data.Map qualified as Map
+import Data.Text qualified as T
+import Data.Vector qualified as V
 
 notEmptyForest :: MapForest -> Bool
 notEmptyForest (Tree m) = not $ Map.null m
@@ -49,7 +47,9 @@ filterMapForest p True (Branch forests) =
   Branch . V.map (filterMapForest p True) $ forests
 filterMapForest p False (Branch forests) =
   let filteredList = V.filter (\v -> p v || hasFilteredChild p v) forests
-   in Branch . V.filter notEmptyForest . V.map (filterMapForest p False)
+   in Branch
+        . V.filter notEmptyForest
+        . V.map (filterMapForest p False)
         $ filteredList
 filterMapForest _ _ leaf@(Leaf _) = leaf
 

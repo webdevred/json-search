@@ -1,24 +1,17 @@
-module Main
-  ( main
-  ) where
-
-import Relude hiding (ByteString)
-
-import Lib
-
-import MapForest (MapForest(..))
+module Main (
+  main,
+) where
 
 import Data.Aeson (decode)
-
-import qualified Data.ByteString.Lazy as BL
-
+import Data.Maybe (isNothing)
+import Lib
+import MapForest (MapForest (..))
+import Query (Query (..))
+import Relude hiding (ByteString)
 import System.Console.GetOpt
 
+import Data.ByteString.Lazy qualified as BL
 import Data.Text qualified as T
-
-import Data.Maybe (isNothing)
-
-import Query (Query(..))
 
 main :: IO ()
 main = do
@@ -56,15 +49,17 @@ options =
   [ Option
       "s"
       ["simple-getter"]
-      (ReqArg
-         (\arg opt -> pure opt {optQuery = pure (SimpleQuery $ T.pack arg)})
-         "SIMPLE GETTER QUERY")
+      ( ReqArg
+          (\arg opt -> pure opt {optQuery = pure (SimpleQuery $ T.pack arg)})
+          "SIMPLE GETTER QUERY"
+      )
       "Simple Getter"
   , Option
       "a"
       ["advanced-getter"]
-      (ReqArg
-         (\arg opt -> pure opt {optQuery = pure (AdvancedQuery $ T.pack arg)})
-         "ADVANCED GETTER")
+      ( ReqArg
+          (\arg opt -> pure opt {optQuery = pure (AdvancedQuery $ T.pack arg)})
+          "ADVANCED GETTER"
+      )
       "Advanced Getter"
   ]

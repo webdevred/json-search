@@ -1,21 +1,20 @@
-module MapForest
-  ( MapForest(..)
-  ) where
-
-import Relude hiding (ByteString)
-import Relude.Bool (Bool(..))
-
-import Data.Map (Map)
-import Data.Map qualified as Map
-import Data.Text (Text)
-import Data.Text qualified as T
-import Data.Vector qualified as V
+module MapForest (
+  MapForest (..),
+) where
 
 import Data.Aeson ((.=))
+import Data.Aeson.Types ()
+import Data.Map (Map)
+import Data.Text (Text)
+import Relude hiding (ByteString)
+import Relude.Bool (Bool (..))
+
 import Data.Aeson qualified as Aeson
 import Data.Aeson.Key qualified as K
 import Data.Aeson.KeyMap qualified as KM
-import Data.Aeson.Types ()
+import Data.Map qualified as Map
+import Data.Text qualified as T
+import Data.Vector qualified as V
 
 unwrap :: Text -> Maybe Text
 unwrap = T.stripSuffix "\"" >=> T.stripPrefix "\""
@@ -31,7 +30,7 @@ data MapForest
   = Tree (Map Text MapForest)
   | Branch (V.Vector MapForest)
   | Leaf Text
-  deriving (Show, Eq)
+  deriving (Eq, Show)
 
 instance Aeson.FromJSON MapForest where
   parseJSON (Aeson.Object o) = do
