@@ -1,0 +1,22 @@
+cradle:
+  multi:
+    - path: ./Setup.hs
+      config:
+        cradle:
+          direct:
+            arguments: [Setup.hs]
+    - path: ./src
+      config:
+        cradle:
+          cabal:
+            component: lib:json-search
+    - path: ./app
+      config:
+        cradle:
+          cabal:
+            component: exe:json-search-exe
+    - path: ./test
+      config:
+        cradle:
+          cabal:
+            component: test:json-search-test
