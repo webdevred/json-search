@@ -1,14 +1,14 @@
-name:                json-search
-version:             0.1.0.0
-github:              "webdevred/json-search"
-license:             BSD-3-Clause
-author:              "webdevred"
-maintainer:          "example@example.com"
-copyright:           "2024 August Johansson"
+name: json-search
+version: 0.1.0.0
+github: webdevred/json-search
+license: BSD-3-Clause
+author: webdevred
+maintainer: example@example.com
+copyright: 2024 August Johansson
 spec-version: 0.36.0
 
 extra-source-files:
-- README.org
+  - README.org
 
 # Metadata used when publishing your package
 # synopsis:            Short description of your package
@@ -17,31 +17,30 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/json-search#readme>
+description: Please see the README on GitHub at <https://github.com/githubuser/json-search#readme>
 
 dependencies:
-- base >= 4.7 && < 5
-- relude
-- bytestring
-- utf8-string
-- aeson
-- vector
-- text
-- containers
-- megaparsec
+  - base >= 4.7 && < 5
+  - relude
+  - bytestring
+  - utf8-string
+  - aeson
+  - vector
+  - text
+  - containers
+  - megaparsec
 
 ghc-options:
-- -Wall
-- -Wcompat
-- -Widentities
-- -Wincomplete-record-updates
-- -Wincomplete-uni-patterns
-- -Wmissing-export-lists
-- -Wmissing-home-modules
-- -Wpartial-fields
-- -Wredundant-constraints
-- -Wno-unused-imports
-
+  - -Wall
+  - -Wcompat
+  - -Widentities
+  - -Wincomplete-record-updates
+  - -Wincomplete-uni-patterns
+  - -Wmissing-export-lists
+  - -Wmissing-home-modules
+  - -Wpartial-fields
+  - -Wredundant-constraints
+  - -Wno-unused-imports
 
 default-extensions:
   - NoImplicitPrelude
@@ -53,22 +52,14 @@ library:
 
 executables:
   json-search-exe:
-    main:                Main.hs
-    source-dirs:         app
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - json-search
+    main: Main.hs
+    source-dirs: app
+    ghc-options: [-threaded, -rtsopts, -with-rtsopts=-N]
+    dependencies: [json-search]
 
 tests:
   json-search-test:
-    main:                Spec.hs
-    source-dirs:         test
-    ghc-options:
-    - -threaded
-    - -rtsopts
-    - -with-rtsopts=-N
-    dependencies:
-    - json-search
+    main: Spec.hs
+    source-dirs: test
+    ghc-options: [-threaded, -rtsopts, -with-rtsopts=-N]
+    dependencies: [json-search]
