@@ -5,6 +5,7 @@ license:             BSD-3-Clause
 author:              "webdevred"
 maintainer:          "example@example.com"
 copyright:           "2024 August Johansson"
+spec-version: 0.36.0
 
 extra-source-files:
 - README.org

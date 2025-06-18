@@ -26,10 +26,6 @@ library
       Lib
       MapForest
       Query
-  other-modules:
-      Paths_json_search
-  autogen-modules:
-      Paths_json_search
   hs-source-dirs:
       src
   default-extensions:
@@ -51,10 +47,6 @@ library
 
 executable json-search-exe
   main-is: Main.hs
-  other-modules:
-      Paths_json_search
-  autogen-modules:
-      Paths_json_search
   hs-source-dirs:
       app
   default-extensions:
@@ -78,10 +70,6 @@ executable json-search-exe
 test-suite json-search-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
-  other-modules:
-      Paths_json_search
-  autogen-modules:
-      Paths_json_search
   hs-source-dirs:
       test
   default-extensions:
